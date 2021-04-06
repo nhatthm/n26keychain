@@ -73,7 +73,7 @@ import (
 
 func buildClient() *n26api.Client {
 	return n26api.NewClient(
-		n26api.WithTokenStorage(n26keychain.TokenStorage()),
+		n26keychain.WithTokenStorage(),
 	)
 }
 ```
