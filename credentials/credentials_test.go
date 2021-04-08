@@ -15,15 +15,14 @@ import (
 	"github.com/nhatthm/n26keychain/test"
 )
 
-func TestCredentials_Load(t *testing.T) {
+func TestCredentials_Username(t *testing.T) {
 	t.Parallel()
 
 	testCases := []struct {
-		scenario         string
-		mockStorage      mock.StorageMocker
-		expectedUsername string
-		expectedPassword string
-		expectedError    string
+		scenario       string
+		mockStorage    mock.StorageMocker
+		expectedResult string
+		expectedError  string
 	}{
 		{
 			scenario: "missing credentials",
@@ -50,8 +49,7 @@ func TestCredentials_Load(t *testing.T) {
 			mockStorage: mock.MockStorage(func(s *mock.Storage) {
 				s.On("Get", "default").Return(`{"username":"foo","password":"bar"}`, nil)
 			}),
-			expectedUsername: "foo",
-			expectedPassword: "bar",
+			expectedResult: "foo",
 		},
 	}
 
@@ -68,8 +66,64 @@ func TestCredentials_Load(t *testing.T) {
 				WithLogger(l),
 			)
 
-			assert.Equal(t, tc.expectedUsername, c.Username())
-			assert.Equal(t, tc.expectedPassword, c.Password())
+			assert.Equal(t, tc.expectedResult, c.Username())
+			assert.Equal(t, tc.expectedError, l.String())
+		})
+	}
+}
+
+func TestCredentials_Password(t *testing.T) {
+	t.Parallel()
+
+	testCases := []struct {
+		scenario       string
+		mockStorage    mock.StorageMocker
+		expectedResult string
+		expectedError  string
+	}{
+		{
+			scenario: "missing credentials",
+			mockStorage: mock.MockStorage(func(s *mock.Storage) {
+				s.On("Get", "default").Return("", keyring.ErrNotFound)
+			}),
+		},
+		{
+			scenario: "could not get credentials",
+			mockStorage: mock.MockStorage(func(s *mock.Storage) {
+				s.On("Get", "default").Return("", errors.New("get error"))
+			}),
+			expectedError: "error: could not get credentials {\"error\":{}}\n",
+		},
+		{
+			scenario: "credentials is in wrong format",
+			mockStorage: mock.MockStorage(func(s *mock.Storage) {
+				s.On("Get", "default").Return("{", nil)
+			}),
+			expectedError: "error: could not unmarshal credentials {\"error\":{\"Offset\":1}}\n",
+		},
+		{
+			scenario: "success",
+			mockStorage: mock.MockStorage(func(s *mock.Storage) {
+				s.On("Get", "default").Return(`{"username":"foo","password":"bar"}`, nil)
+			}),
+			expectedResult: "bar",
+		},
+	}
+
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.scenario, func(t *testing.T) {
+			t.Parallel()
+
+			s := tc.mockStorage(t)
+			l := &ctxd.LoggerMock{}
+
+			c := New(
+				WithStorage(s),
+				WithLogger(l),
+			)
+
+			assert.Equal(t, tc.expectedResult, c.Password())
 			assert.Equal(t, tc.expectedError, l.String())
 		})
 	}

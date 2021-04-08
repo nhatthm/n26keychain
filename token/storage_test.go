@@ -2,6 +2,7 @@ package token
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -30,6 +31,14 @@ func TestTokenStorage_Get(t *testing.T) {
 				s.On("Get", tokenStorageUser).
 					Return("", keyring.ErrNotFound)
 			}),
+		},
+		{
+			scenario: "could not get token",
+			mockStorage: mock.MockStorage(func(s *mock.Storage) {
+				s.On("Get", tokenStorageUser).
+					Return("", errors.New("get error"))
+			}),
+			expectedError: "get error",
 		},
 		{
 			scenario: "invalid token",
