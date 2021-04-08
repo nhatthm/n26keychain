@@ -16,8 +16,8 @@ github.com/nhatthm/go-clock v0.1.0 h1:ew6FlwLn+8LGa7i2du/FruyqZO2rDdxdlPj4lHVM2e
 github.com/nhatthm/go-clock v0.1.0/go.mod h1:r76DL7Tmu0OLjAWyppNYW9fDhIagLHH/uHLwqSYJfsg=
 github.com/nhatthm/httpmock v0.4.5 h1:JVYdx66fxjU13LwLF9+DIm6VodT+dYn/rUMWHO2KW5w=
 github.com/nhatthm/httpmock v0.4.5/go.mod h1:t25iJhLZKE5PiPkpVyriqXB7f1EFgzDVw7sVJEINRZg=
-github.com/nhatthm/n26api v0.2.0 h1:eqG7vGukm+y33azDbfX52WLDsIcaoI1tQ5a4cWFWcoU=
-github.com/nhatthm/n26api v0.2.0/go.mod h1:T3iZT2fY5atU/eynBWHnR/KX7ONAWevtq4nUH0q1muY=
+github.com/nhatthm/n26api v0.2.3 h1:LsGlIN5F4FM47f0NnMhe1vPYYULthZHuksMPxORfeMg=
+github.com/nhatthm/n26api v0.2.3/go.mod h1:T3iZT2fY5atU/eynBWHnR/KX7ONAWevtq4nUH0q1muY=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/objx v0.1.0 h1:4G4v2dO3VZwixGIRoQ5Lfboy6nUhCyYzaqnIAPPhYs4=
