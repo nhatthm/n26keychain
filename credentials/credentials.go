@@ -14,10 +14,7 @@ import (
 	"github.com/nhatthm/n26keychain"
 )
 
-const (
-	credentialsService = "n26api.credentials"
-	credentialsKey     = "default"
-)
+const credentialsService = "n26api.credentials"
 
 var _ KeychainCredentials = (*Credentials)(nil)
 
@@ -145,12 +142,12 @@ func (c *Credentials) Delete() error {
 }
 
 // New initiates a new Credentials.
-func New(options ...Option) *Credentials {
+func New(deviceID uuid.UUID, options ...Option) *Credentials {
 	c := &Credentials{
 		storage: n26keychain.NewStorage(credentialsService),
 		logger:  ctxd.NoOpLogger{},
 
-		key: credentialsKey,
+		key: deviceID.String(),
 	}
 
 	for _, o := range options {
@@ -158,13 +155,6 @@ func New(options ...Option) *Credentials {
 	}
 
 	return c
-}
-
-// WithDeviceID sets device ID for Credentials.
-func WithDeviceID(deviceID uuid.UUID) Option {
-	return func(p *Credentials) {
-		p.key = deviceID.String()
-	}
 }
 
 // WithStorage sets storage for Credentials.
@@ -178,5 +168,12 @@ func WithStorage(storage n26keychain.Storage) Option {
 func WithLogger(logger ctxd.Logger) Option {
 	return func(p *Credentials) {
 		p.logger = logger
+	}
+}
+
+// WithCredentialsProvider sets keychain as a credential provider.
+func WithCredentialsProvider(options ...Option) n26api.Option {
+	return func(c *n26api.Client) {
+		n26api.WithCredentialsProvider(New(c.DeviceID(), options...))(c)
 	}
 }

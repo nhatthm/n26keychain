@@ -31,18 +31,17 @@ Build `n26api.Client`:
 package mypackage
 
 import (
+	"github.com/google/uuid"
 	"github.com/nhatthm/n26api"
-	"github.com/nhatthm/n26keychain"
+	"github.com/nhatthm/n26keychain/credentials"
 )
 
 func buildClient() (*n26api.Client, error) {
-	cred, err := n26keychain.Credentials()
-	if err != nil {
-		return nil, err
-	}
+	deviceID := uuid.New()
 
 	c := n26api.NewClient(
-		n26api.WithCredentialsProvider(cred),
+		n26api.WithDeviceID(deviceID),
+		credentials.WithCredentialsProvider(),
 	)
 
 	return c, nil
@@ -54,10 +53,15 @@ Persist credentials in system keyring:
 ```go
 package mypackage
 
-import "github.com/nhatthm/n26keychain"
+import (
+	"github.com/google/uuid"
+	"github.com/nhatthm/n26keychain/credentials"
+)
 
-func persist(username, password string) error {
-	return n26keychain.PersistCredentials(username, password)
+func persist(deviceID uuid.UUID, username, password string) error {
+	c := credentials.New(deviceID)
+	
+	return c.Update(username, password)
 }
 ```
 
@@ -68,12 +72,12 @@ package mypackage
 
 import (
 	"github.com/nhatthm/n26api"
-	"github.com/nhatthm/n26keychain"
+	"github.com/nhatthm/n26keychain/token"
 )
 
 func buildClient() *n26api.Client {
 	return n26api.NewClient(
-		n26keychain.WithTokenStorage(),
+		token.WithTokenStorage(),
 	)
 }
 ```

@@ -18,6 +18,8 @@ import (
 func TestCredentials_Username(t *testing.T) {
 	t.Parallel()
 
+	deviceID := uuid.New()
+
 	testCases := []struct {
 		scenario       string
 		mockStorage    mock.StorageMocker
@@ -27,27 +29,27 @@ func TestCredentials_Username(t *testing.T) {
 		{
 			scenario: "missing credentials",
 			mockStorage: mock.MockStorage(func(s *mock.Storage) {
-				s.On("Get", "default").Return("", keyring.ErrNotFound)
+				s.On("Get", deviceID.String()).Return("", keyring.ErrNotFound)
 			}),
 		},
 		{
 			scenario: "could not get credentials",
 			mockStorage: mock.MockStorage(func(s *mock.Storage) {
-				s.On("Get", "default").Return("", errors.New("get error"))
+				s.On("Get", deviceID.String()).Return("", errors.New("get error"))
 			}),
 			expectedError: "error: could not get credentials {\"error\":{}}\n",
 		},
 		{
 			scenario: "credentials is in wrong format",
 			mockStorage: mock.MockStorage(func(s *mock.Storage) {
-				s.On("Get", "default").Return("{", nil)
+				s.On("Get", deviceID.String()).Return("{", nil)
 			}),
 			expectedError: "error: could not unmarshal credentials {\"error\":{\"Offset\":1}}\n",
 		},
 		{
 			scenario: "success",
 			mockStorage: mock.MockStorage(func(s *mock.Storage) {
-				s.On("Get", "default").Return(`{"username":"foo","password":"bar"}`, nil)
+				s.On("Get", deviceID.String()).Return(`{"username":"foo","password":"bar"}`, nil)
 			}),
 			expectedResult: "foo",
 		},
@@ -61,7 +63,7 @@ func TestCredentials_Username(t *testing.T) {
 			s := tc.mockStorage(t)
 			l := &ctxd.LoggerMock{}
 
-			c := New(
+			c := New(deviceID,
 				WithStorage(s),
 				WithLogger(l),
 			)
@@ -75,6 +77,8 @@ func TestCredentials_Username(t *testing.T) {
 func TestCredentials_Password(t *testing.T) {
 	t.Parallel()
 
+	deviceID := uuid.New()
+
 	testCases := []struct {
 		scenario       string
 		mockStorage    mock.StorageMocker
@@ -84,27 +88,27 @@ func TestCredentials_Password(t *testing.T) {
 		{
 			scenario: "missing credentials",
 			mockStorage: mock.MockStorage(func(s *mock.Storage) {
-				s.On("Get", "default").Return("", keyring.ErrNotFound)
+				s.On("Get", deviceID.String()).Return("", keyring.ErrNotFound)
 			}),
 		},
 		{
 			scenario: "could not get credentials",
 			mockStorage: mock.MockStorage(func(s *mock.Storage) {
-				s.On("Get", "default").Return("", errors.New("get error"))
+				s.On("Get", deviceID.String()).Return("", errors.New("get error"))
 			}),
 			expectedError: "error: could not get credentials {\"error\":{}}\n",
 		},
 		{
 			scenario: "credentials is in wrong format",
 			mockStorage: mock.MockStorage(func(s *mock.Storage) {
-				s.On("Get", "default").Return("{", nil)
+				s.On("Get", deviceID.String()).Return("{", nil)
 			}),
 			expectedError: "error: could not unmarshal credentials {\"error\":{\"Offset\":1}}\n",
 		},
 		{
 			scenario: "success",
 			mockStorage: mock.MockStorage(func(s *mock.Storage) {
-				s.On("Get", "default").Return(`{"username":"foo","password":"bar"}`, nil)
+				s.On("Get", deviceID.String()).Return(`{"username":"foo","password":"bar"}`, nil)
 			}),
 			expectedResult: "bar",
 		},
@@ -118,7 +122,7 @@ func TestCredentials_Password(t *testing.T) {
 			s := tc.mockStorage(t)
 			l := &ctxd.LoggerMock{}
 
-			c := New(
+			c := New(deviceID,
 				WithStorage(s),
 				WithLogger(l),
 			)
@@ -130,16 +134,18 @@ func TestCredentials_Password(t *testing.T) {
 }
 
 func TestCredentials_LoadOnce(t *testing.T) {
+	deviceID := uuid.New()
+
 	expectedUsername := "foo"
 	expectedPassword := "bar"
 
 	storage := mock.MockStorage(func(s *mock.Storage) {
-		s.On("Get", "default").
+		s.On("Get", deviceID.String()).
 			Return(`{"username":"foo","password":"bar"}`, nil).
 			Once()
 	})(t)
 
-	c := New(WithStorage(storage))
+	c := New(deviceID, WithStorage(storage))
 
 	// 1st run calls storage.
 	assert.Equal(t, expectedUsername, c.Username())
@@ -162,7 +168,7 @@ func TestCredentials_LoadKeyring(t *testing.T) {
 	expectedPassword := "bar"
 
 	test.Run(t, credentialsService, deviceID.String(), expect, func(t *testing.T) { // nolint: thelper
-		c := New(WithDeviceID(deviceID))
+		c := New(deviceID)
 
 		assert.Equal(t, expectedUsername, c.Username())
 		assert.Equal(t, expectedPassword, c.Password())
@@ -171,6 +177,8 @@ func TestCredentials_LoadKeyring(t *testing.T) {
 
 func TestCredentials_Update(t *testing.T) {
 	t.Parallel()
+
+	deviceID := uuid.New()
 
 	username := "foo"
 	password := "bar"
@@ -185,7 +193,7 @@ func TestCredentials_Update(t *testing.T) {
 		{
 			scenario: "could not update",
 			mockStorage: mock.MockStorage(func(s *mock.Storage) {
-				s.On("Set", "default", `{"username":"foo","password":"bar"}`).
+				s.On("Set", deviceID.String(), `{"username":"foo","password":"bar"}`).
 					Return(errors.New("update error"))
 			}),
 			expectedError: "update error",
@@ -193,7 +201,7 @@ func TestCredentials_Update(t *testing.T) {
 		{
 			scenario: "success",
 			mockStorage: mock.MockStorage(func(s *mock.Storage) {
-				s.On("Set", "default", `{"username":"foo","password":"bar"}`).
+				s.On("Set", deviceID.String(), `{"username":"foo","password":"bar"}`).
 					Return(nil)
 			}),
 			expectedUsername: "foo",
@@ -207,7 +215,7 @@ func TestCredentials_Update(t *testing.T) {
 			t.Parallel()
 
 			s := tc.mockStorage(t)
-			c := New(WithStorage(s))
+			c := New(deviceID, WithStorage(s))
 
 			err := c.Update(username, password)
 
@@ -223,16 +231,18 @@ func TestCredentials_Update(t *testing.T) {
 }
 
 func TestCredentials_UpdateOnce(t *testing.T) {
+	deviceID := uuid.New()
+
 	storage := mock.MockStorage(func(s *mock.Storage) {
-		s.On("Get", "default").
+		s.On("Get", deviceID.String()).
 			Return(`{"username":"foo","password":"bar"}`, nil).
 			Once()
 
-		s.On("Set", "default", `{"username":"john","password":"doe"}`).
+		s.On("Set", deviceID.String(), `{"username":"john","password":"doe"}`).
 			Return(nil)
 	})(t)
 
-	c := New(WithStorage(storage))
+	c := New(deviceID, WithStorage(storage))
 
 	// 1st run calls storage.
 	expectedUsername := "foo"
@@ -260,7 +270,7 @@ func TestCredentials_UpdateKeyring(t *testing.T) {
 	expectedPassword := "bar"
 
 	test.Run(t, credentialsService, deviceID.String(), nil, func(t *testing.T) { // nolint: thelper
-		c := New(WithDeviceID(deviceID))
+		c := New(deviceID)
 
 		err := c.Update("foo", "bar")
 		assert.NoError(t, err)
@@ -280,6 +290,8 @@ func TestCredentials_UpdateKeyring(t *testing.T) {
 func TestCredentials_Delete(t *testing.T) {
 	t.Parallel()
 
+	deviceID := uuid.New()
+
 	testCases := []struct {
 		scenario      string
 		mockStorage   mock.StorageMocker
@@ -288,20 +300,20 @@ func TestCredentials_Delete(t *testing.T) {
 		{
 			scenario: "error not found",
 			mockStorage: mock.MockStorage(func(s *mock.Storage) {
-				s.On("Delete", "default").Return(keyring.ErrNotFound)
+				s.On("Delete", deviceID.String()).Return(keyring.ErrNotFound)
 			}),
 		},
 		{
 			scenario: "could not delete",
 			mockStorage: mock.MockStorage(func(s *mock.Storage) {
-				s.On("Delete", "default").Return(errors.New("delete error"))
+				s.On("Delete", deviceID.String()).Return(errors.New("delete error"))
 			}),
 			expectedError: "delete error",
 		},
 		{
 			scenario: "success",
 			mockStorage: mock.MockStorage(func(s *mock.Storage) {
-				s.On("Delete", "default").Return(nil)
+				s.On("Delete", deviceID.String()).Return(nil)
 			}),
 		},
 	}
@@ -312,7 +324,7 @@ func TestCredentials_Delete(t *testing.T) {
 			t.Parallel()
 
 			s := tc.mockStorage(t)
-			c := New(WithStorage(s))
+			c := New(deviceID, WithStorage(s))
 
 			err := c.Delete()
 
@@ -326,19 +338,21 @@ func TestCredentials_Delete(t *testing.T) {
 }
 
 func TestCredentials_DeleteOnce(t *testing.T) {
+	deviceID := uuid.New()
+
 	storage := mock.MockStorage(func(s *mock.Storage) {
-		s.On("Get", "default").
+		s.On("Get", deviceID.String()).
 			Return(`{"username":"foo","password":"bar"}`, nil).
 			Once()
 
-		s.On("Delete", "default").Return(nil).Once()
+		s.On("Delete", deviceID.String()).Return(nil).Once()
 
-		s.On("Get", "default").
+		s.On("Get", deviceID.String()).
 			Return("", keyring.ErrNotFound).
 			Once()
 	})(t)
 
-	c := New(WithStorage(storage))
+	c := New(deviceID, WithStorage(storage))
 
 	// 1st run calls storage.
 	expectedUsername := "foo"
@@ -368,7 +382,7 @@ func TestCredentials_DeleteKeyring(t *testing.T) {
 	expectedPassword := "bar"
 
 	test.Run(t, credentialsService, deviceID.String(), expect, func(t *testing.T) { // nolint: thelper
-		c := New(WithDeviceID(deviceID))
+		c := New(deviceID)
 
 		assert.Equal(t, expectedUsername, c.Username())
 		assert.Equal(t, expectedPassword, c.Password())
