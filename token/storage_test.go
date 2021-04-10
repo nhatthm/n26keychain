@@ -102,7 +102,7 @@ func TestTokenStorage_GetKeyring(t *testing.T) {
 	})
 }
 
-func TestTokenStorage_setKeyring(t *testing.T) {
+func TestTokenStorage_SetAndDeleteKeyring(t *testing.T) {
 	expectedToken := auth.OAuthToken{
 		AccessToken:      "access",
 		RefreshToken:     "refresh",
@@ -112,8 +112,8 @@ func TestTokenStorage_setKeyring(t *testing.T) {
 
 	test.Run(t, tokenStorageService, tokenStorageUser, nil, func(t *testing.T) { // nolint: thelper
 		p := NewStorage()
-		err := p.Set(context.Background(), tokenStorageUser, expectedToken)
 
+		err := p.Set(context.Background(), tokenStorageUser, expectedToken)
 		assert.NoError(t, err)
 
 		// Get from keychain.
@@ -122,5 +122,34 @@ func TestTokenStorage_setKeyring(t *testing.T) {
 
 		assert.Equal(t, expectedData, data)
 		assert.NoError(t, err)
+	})
+}
+
+func TestTokenStorage_DeleteKeyring(t *testing.T) {
+	token := auth.OAuthToken{
+		AccessToken:      "access",
+		RefreshToken:     "refresh",
+		ExpiresAt:        time.Date(2020, 1, 2, 3, 4, 5, 0, time.UTC),
+		RefreshExpiresAt: time.Date(2020, 1, 2, 4, 4, 5, 0, time.UTC),
+	}
+
+	test.Run(t, tokenStorageService, tokenStorageUser, nil, func(t *testing.T) { // nolint: thelper
+		p := NewStorage()
+
+		// Prepare data.
+		err := p.Set(context.Background(), tokenStorageUser, token)
+		assert.NoError(t, err)
+
+		// Verify data.
+		_, err = keyring.Get(tokenStorageService, tokenStorageUser)
+		assert.NoError(t, err)
+
+		// Test.
+		err = p.Delete(context.Background(), tokenStorageUser)
+		assert.NoError(t, err)
+
+		// Verify.
+		_, err = keyring.Get(tokenStorageService, tokenStorageUser)
+		assert.Equal(t, keyring.ErrNotFound, err)
 	})
 }
