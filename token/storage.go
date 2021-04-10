@@ -15,7 +15,18 @@ import (
 
 const tokenStorageService = "n26api.token" // nolint: gosec
 
-var _ auth.TokenStorage = (*Storage)(nil)
+var (
+	_ auth.TokenStorage = (*Storage)(nil)
+	_ KeychainStorage   = (*Storage)(nil)
+)
+
+// KeychainStorage manages credentials in keychain.
+type KeychainStorage interface {
+	auth.TokenStorage
+
+	// Delete deletes the token in keychain.
+	Delete(ctx context.Context, key string) error
+}
 
 // StorageOption configures Storage.
 type StorageOption func(s *Storage)
@@ -55,8 +66,13 @@ func (s *Storage) Set(ctx context.Context, key string, token auth.OAuthToken) er
 	return s.storage.Set(key, string(data))
 }
 
+// Delete deletes the token in keychain.
+func (s *Storage) Delete(_ context.Context, key string) error {
+	return s.storage.Delete(key)
+}
+
 // NewStorage returns keychain as a token storage.
-func NewStorage(options ...StorageOption) auth.TokenStorage {
+func NewStorage(options ...StorageOption) *Storage {
 	s := &Storage{
 		storage: n26keychain.NewStorage(tokenStorageService),
 	}
