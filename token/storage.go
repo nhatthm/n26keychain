@@ -84,8 +84,8 @@ func NewStorage(options ...StorageOption) *Storage {
 	return s
 }
 
-// WithStorage sets storage for Credentials.
-func WithStorage(storage n26keychain.Storage) StorageOption {
+// WithKeyring sets keychain storage for Storage.
+func WithKeyring(storage n26keychain.Storage) StorageOption {
 	return func(s *Storage) {
 		s.storage = storage
 	}

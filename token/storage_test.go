@@ -66,7 +66,7 @@ func TestTokenStorage_Get(t *testing.T) {
 	for _, tc := range testCases {
 		tc := tc
 		t.Run(tc.scenario, func(t *testing.T) {
-			p := NewStorage(WithStorage(tc.mockStorage(t)))
+			p := NewStorage(WithKeyring(tc.mockStorage(t)))
 			token, err := p.Get(context.Background(), tokenStorageUser)
 
 			assert.Equal(t, tc.expectedToken, token)
