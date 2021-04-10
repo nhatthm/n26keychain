@@ -68,7 +68,12 @@ func (s *Storage) Set(ctx context.Context, key string, token auth.OAuthToken) er
 
 // Delete deletes the token in keychain.
 func (s *Storage) Delete(_ context.Context, key string) error {
-	return s.storage.Delete(key)
+	err := s.storage.Delete(key)
+	if err != nil && errors.Is(err, keyring.ErrNotFound) {
+		return nil
+	}
+
+	return err
 }
 
 // NewStorage returns keychain as a token storage.

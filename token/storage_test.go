@@ -125,6 +125,51 @@ func TestTokenStorage_SetAndDeleteKeyring(t *testing.T) {
 	})
 }
 
+func TestTokenStorage_Delete(t *testing.T) {
+	testCases := []struct {
+		scenario      string
+		mockStorage   mock.StorageMocker
+		expectedError string
+	}{
+		{
+			scenario: "token not found",
+			mockStorage: mock.MockStorage(func(s *mock.Storage) {
+				s.On("Delete", tokenStorageUser).
+					Return(keyring.ErrNotFound)
+			}),
+		},
+		{
+			scenario: "could not delete token",
+			mockStorage: mock.MockStorage(func(s *mock.Storage) {
+				s.On("Delete", tokenStorageUser).
+					Return(errors.New("delete error"))
+			}),
+			expectedError: "delete error",
+		},
+		{
+			scenario: "success",
+			mockStorage: mock.MockStorage(func(s *mock.Storage) {
+				s.On("Delete", tokenStorageUser).
+					Return(nil)
+			}),
+		},
+	}
+
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.scenario, func(t *testing.T) {
+			p := NewStorage(WithKeyring(tc.mockStorage(t)))
+			err := p.Delete(context.Background(), tokenStorageUser)
+
+			if tc.expectedError == "" {
+				assert.NoError(t, err)
+			} else {
+				assert.EqualError(t, err, tc.expectedError)
+			}
+		})
+	}
+}
+
 func TestTokenStorage_DeleteKeyring(t *testing.T) {
 	token := auth.OAuthToken{
 		AccessToken:      "access",
