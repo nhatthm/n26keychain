@@ -1,3 +1,5 @@
+// +build !integration
+
 package credentials
 
 import (
@@ -272,7 +274,10 @@ func TestCredentials_UpdateKeyring(t *testing.T) {
 	test.Run(t, credentialsService, deviceID.String(), nil, func(t *testing.T) { // nolint: thelper
 		c := New(deviceID)
 
-		err := c.Update("foo", "bar")
+		_, err := keyring.Get(credentialsService, deviceID.String())
+		require.Equal(t, keyring.ErrNotFound, err)
+
+		err = c.Update("foo", "bar")
 		assert.NoError(t, err)
 
 		assert.Equal(t, expectedUsername, c.Username())

@@ -13,8 +13,6 @@ import (
 	"github.com/nhatthm/n26keychain"
 )
 
-const tokenStorageService = "n26api.token" // nolint: gosec
-
 var (
 	_ auth.TokenStorage = (*Storage)(nil)
 	_ KeychainStorage   = (*Storage)(nil)

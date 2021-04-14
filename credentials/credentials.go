@@ -14,8 +14,6 @@ import (
 	"github.com/nhatthm/n26keychain"
 )
 
-const credentialsService = "n26api.credentials"
-
 var _ KeychainCredentials = (*Credentials)(nil)
 
 // KeychainCredentials manages credentials in keychain.
