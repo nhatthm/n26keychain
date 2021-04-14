@@ -1,3 +1,5 @@
+// +build !integration
+
 package token
 
 import (
@@ -16,7 +18,7 @@ import (
 	"github.com/nhatthm/n26keychain/test"
 )
 
-var tokenStorageUser = "john@example.com"
+var tokenStorageKey = "john@example.com:54252481-ff0e-4903-9a9c-1886d16eab73"
 
 func TestTokenStorage_Get(t *testing.T) {
 	testCases := []struct {
@@ -28,14 +30,14 @@ func TestTokenStorage_Get(t *testing.T) {
 		{
 			scenario: "token not found",
 			mockStorage: mock.MockStorage(func(s *mock.Storage) {
-				s.On("Get", tokenStorageUser).
+				s.On("Get", tokenStorageKey).
 					Return("", keyring.ErrNotFound)
 			}),
 		},
 		{
 			scenario: "could not get token",
 			mockStorage: mock.MockStorage(func(s *mock.Storage) {
-				s.On("Get", tokenStorageUser).
+				s.On("Get", tokenStorageKey).
 					Return("", errors.New("get error"))
 			}),
 			expectedError: "get error",
@@ -43,7 +45,7 @@ func TestTokenStorage_Get(t *testing.T) {
 		{
 			scenario: "invalid token",
 			mockStorage: mock.MockStorage(func(s *mock.Storage) {
-				s.On("Get", tokenStorageUser).
+				s.On("Get", tokenStorageKey).
 					Return("{", nil)
 			}),
 			expectedError: `could not unmarshal token: unexpected end of JSON input`,
@@ -51,7 +53,7 @@ func TestTokenStorage_Get(t *testing.T) {
 		{
 			scenario: "success",
 			mockStorage: mock.MockStorage(func(s *mock.Storage) {
-				s.On("Get", tokenStorageUser).
+				s.On("Get", tokenStorageKey).
 					Return(`{"access_token":"access","refresh_token":"refresh","expires_at":"2020-01-02T03:04:05.000Z","refresh_expires_at":"2020-01-02T04:04:05.000Z"}`, nil)
 			}),
 			expectedToken: auth.OAuthToken{
@@ -67,7 +69,7 @@ func TestTokenStorage_Get(t *testing.T) {
 		tc := tc
 		t.Run(tc.scenario, func(t *testing.T) {
 			p := NewStorage(WithKeyring(tc.mockStorage(t)))
-			token, err := p.Get(context.Background(), tokenStorageUser)
+			token, err := p.Get(context.Background(), tokenStorageKey)
 
 			assert.Equal(t, tc.expectedToken, token)
 
@@ -82,7 +84,7 @@ func TestTokenStorage_Get(t *testing.T) {
 
 func TestTokenStorage_GetKeyring(t *testing.T) {
 	expect := func(t *testing.T, s n26keychain.Storage) { // nolint: thelper
-		err := s.Set(tokenStorageUser, `{"access_token":"access","refresh_token":"refresh","expires_at":"2020-01-02T03:04:05.000Z","refresh_expires_at":"2020-01-02T04:04:05.000Z"}`)
+		err := s.Set(tokenStorageKey, `{"access_token":"access","refresh_token":"refresh","expires_at":"2020-01-02T03:04:05.000Z","refresh_expires_at":"2020-01-02T04:04:05.000Z"}`)
 		require.NoError(t, err)
 	}
 
@@ -93,9 +95,10 @@ func TestTokenStorage_GetKeyring(t *testing.T) {
 		RefreshExpiresAt: time.Date(2020, 1, 2, 4, 4, 5, 0, time.UTC),
 	}
 
-	test.Run(t, tokenStorageService, tokenStorageUser, expect, func(t *testing.T) { // nolint: thelper
+	test.Run(t, tokenStorageService, tokenStorageKey, expect, func(t *testing.T) { // nolint: thelper
 		p := NewStorage()
-		token, err := p.Get(context.Background(), tokenStorageUser)
+
+		token, err := p.Get(context.Background(), tokenStorageKey)
 
 		assert.Equal(t, expectedToken, token)
 		assert.NoError(t, err)
@@ -110,14 +113,14 @@ func TestTokenStorage_SetAndDeleteKeyring(t *testing.T) {
 		RefreshExpiresAt: time.Date(2020, 1, 2, 4, 4, 5, 0, time.UTC),
 	}
 
-	test.Run(t, tokenStorageService, tokenStorageUser, nil, func(t *testing.T) { // nolint: thelper
+	test.Run(t, tokenStorageService, tokenStorageKey, nil, func(t *testing.T) { // nolint: thelper
 		p := NewStorage()
 
-		err := p.Set(context.Background(), tokenStorageUser, expectedToken)
+		err := p.Set(context.Background(), tokenStorageKey, expectedToken)
 		assert.NoError(t, err)
 
 		// Get from keychain.
-		data, err := keyring.Get(tokenStorageService, tokenStorageUser)
+		data, err := keyring.Get(tokenStorageService, tokenStorageKey)
 		expectedData := `{"access_token":"access","refresh_token":"refresh","expires_at":"2020-01-02T03:04:05Z","refresh_expires_at":"2020-01-02T04:04:05Z"}`
 
 		assert.Equal(t, expectedData, data)
@@ -134,14 +137,14 @@ func TestTokenStorage_Delete(t *testing.T) {
 		{
 			scenario: "token not found",
 			mockStorage: mock.MockStorage(func(s *mock.Storage) {
-				s.On("Delete", tokenStorageUser).
+				s.On("Delete", tokenStorageKey).
 					Return(keyring.ErrNotFound)
 			}),
 		},
 		{
 			scenario: "could not delete token",
 			mockStorage: mock.MockStorage(func(s *mock.Storage) {
-				s.On("Delete", tokenStorageUser).
+				s.On("Delete", tokenStorageKey).
 					Return(errors.New("delete error"))
 			}),
 			expectedError: "delete error",
@@ -149,7 +152,7 @@ func TestTokenStorage_Delete(t *testing.T) {
 		{
 			scenario: "success",
 			mockStorage: mock.MockStorage(func(s *mock.Storage) {
-				s.On("Delete", tokenStorageUser).
+				s.On("Delete", tokenStorageKey).
 					Return(nil)
 			}),
 		},
@@ -159,7 +162,7 @@ func TestTokenStorage_Delete(t *testing.T) {
 		tc := tc
 		t.Run(tc.scenario, func(t *testing.T) {
 			p := NewStorage(WithKeyring(tc.mockStorage(t)))
-			err := p.Delete(context.Background(), tokenStorageUser)
+			err := p.Delete(context.Background(), tokenStorageKey)
 
 			if tc.expectedError == "" {
 				assert.NoError(t, err)
@@ -178,23 +181,23 @@ func TestTokenStorage_DeleteKeyring(t *testing.T) {
 		RefreshExpiresAt: time.Date(2020, 1, 2, 4, 4, 5, 0, time.UTC),
 	}
 
-	test.Run(t, tokenStorageService, tokenStorageUser, nil, func(t *testing.T) { // nolint: thelper
+	test.Run(t, tokenStorageService, tokenStorageKey, nil, func(t *testing.T) { // nolint: thelper
 		p := NewStorage()
 
 		// Prepare data.
-		err := p.Set(context.Background(), tokenStorageUser, token)
+		err := p.Set(context.Background(), tokenStorageKey, token)
 		assert.NoError(t, err)
 
 		// Verify data.
-		_, err = keyring.Get(tokenStorageService, tokenStorageUser)
+		_, err = keyring.Get(tokenStorageService, tokenStorageKey)
 		assert.NoError(t, err)
 
 		// Test.
-		err = p.Delete(context.Background(), tokenStorageUser)
+		err = p.Delete(context.Background(), tokenStorageKey)
 		assert.NoError(t, err)
 
 		// Verify.
-		_, err = keyring.Get(tokenStorageService, tokenStorageUser)
+		_, err = keyring.Get(tokenStorageService, tokenStorageKey)
 		assert.Equal(t, keyring.ErrNotFound, err)
 	})
 }
