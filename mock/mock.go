@@ -51,7 +51,7 @@ func mockStorage(mocks ...func(s *Storage)) *Storage {
 }
 
 // MockStorage creates Storage mock with cleanup to ensure all the expectations are met.
-func MockStorage(mocks ...func(s *Storage)) StorageMocker { // nolint: golint
+func MockStorage(mocks ...func(s *Storage)) StorageMocker { // nolint: revive
 	return func(tb testing.TB) *Storage {
 		tb.Helper()
 
