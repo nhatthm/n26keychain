@@ -3,4 +3,4 @@
 
 package credentials
 
-const credentialsService = "n26api.credentials"
+const credentialsService = "n26api.credentials" // nolint: gosec
