@@ -3,7 +3,7 @@ module github.com/nhatthm/n26keychain
 go 1.17
 
 require (
-	github.com/bool64/ctxd v1.0.0
+	github.com/bool64/ctxd v1.1.0
 	github.com/google/uuid v1.3.0
 	github.com/nhatthm/n26api v0.4.0
 	github.com/stretchr/testify v1.7.0
@@ -11,7 +11,6 @@ require (
 )
 
 require (
-	github.com/bool64/dev v0.1.41 // indirect
 	github.com/danieljoos/wincred v1.1.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/godbus/dbus/v5 v5.0.6 // indirect
