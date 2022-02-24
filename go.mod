@@ -7,10 +7,11 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/nhatthm/n26api v0.4.0
 	github.com/stretchr/testify v1.7.0
-	github.com/zalando/go-keyring v0.1.1
+	github.com/zalando/go-keyring v0.2.0
 )
 
 require (
+	github.com/alessio/shellescape v1.4.1 // indirect
 	github.com/danieljoos/wincred v1.1.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/godbus/dbus/v5 v5.0.6 // indirect
