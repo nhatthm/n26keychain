@@ -6,7 +6,7 @@ require (
 	github.com/bool64/ctxd v1.1.2
 	github.com/google/uuid v1.3.0
 	github.com/nhatthm/n26api v0.4.0
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.7.1
 	github.com/zalando/go-keyring v0.2.0
 )
 
