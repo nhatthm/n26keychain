@@ -7,7 +7,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/nhatthm/n26api v0.4.0
 	github.com/stretchr/testify v1.7.1
-	github.com/zalando/go-keyring v0.2.0
+	github.com/zalando/go-keyring v0.2.1
 )
 
 require (
