@@ -3,7 +3,7 @@ module github.com/nhatthm/n26keychain
 go 1.17
 
 require (
-	github.com/bool64/ctxd v1.1.3
+	github.com/bool64/ctxd v1.2.0
 	github.com/google/uuid v1.3.0
 	github.com/nhatthm/n26api v0.4.0
 	github.com/stretchr/testify v1.8.0
