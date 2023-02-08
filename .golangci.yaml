@@ -21,6 +21,7 @@ linters:
   enable-all: true
   disable:
     - exhaustivestruct
+    - exhaustruct
     - forbidigo
     - forcetypeassert
     - gci
@@ -35,8 +36,8 @@ linters:
     - paralleltest
     - scopelint
     - testpackage
-    - wrapcheck
     - varnamelen
+    - wrapcheck
 
 issues:
   exclude-use-default: false

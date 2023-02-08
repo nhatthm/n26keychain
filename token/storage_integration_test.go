@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 package token
@@ -21,7 +22,7 @@ var tokenStorageKey = "john@example.com:54252481-ff0e-4903-9a9c-1886d16eab73"
 func TestIntegrationTokenStorage_GetKeyringNotFound(t *testing.T) {
 	expectedToken := auth.OAuthToken{}
 
-	test.Run(t, tokenStorageService, tokenStorageKey, nil, func(t *testing.T) { // nolint: thelper
+	test.Run(t, tokenStorageService, tokenStorageKey, nil, func(t *testing.T) { //nolint: thelper
 		p := NewStorage()
 
 		_, err := keyring.Get(tokenStorageService, tokenStorageKey)
@@ -35,7 +36,7 @@ func TestIntegrationTokenStorage_GetKeyringNotFound(t *testing.T) {
 }
 
 func TestIntegrationTokenStorage_GetKeyring(t *testing.T) {
-	expect := func(t *testing.T, s n26keychain.Storage) { // nolint: thelper
+	expect := func(t *testing.T, s n26keychain.Storage) { //nolint: thelper
 		err := s.Set(tokenStorageKey, `{"access_token":"access","refresh_token":"refresh","expires_at":"2020-01-02T03:04:05.000Z","refresh_expires_at":"2020-01-02T04:04:05.000Z"}`)
 		require.NoError(t, err)
 	}
@@ -47,7 +48,7 @@ func TestIntegrationTokenStorage_GetKeyring(t *testing.T) {
 		RefreshExpiresAt: time.Date(2020, 1, 2, 4, 4, 5, 0, time.UTC),
 	}
 
-	test.Run(t, tokenStorageService, tokenStorageKey, expect, func(t *testing.T) { // nolint: thelper
+	test.Run(t, tokenStorageService, tokenStorageKey, expect, func(t *testing.T) { //nolint: thelper
 		p := NewStorage()
 
 		token, err := p.Get(context.Background(), tokenStorageKey)
@@ -65,7 +66,7 @@ func TestIntegrationTokenStorage_SetKeyring(t *testing.T) {
 		RefreshExpiresAt: time.Date(2020, 1, 2, 4, 4, 5, 0, time.UTC),
 	}
 
-	test.Run(t, tokenStorageService, tokenStorageKey, nil, func(t *testing.T) { // nolint: thelper
+	test.Run(t, tokenStorageService, tokenStorageKey, nil, func(t *testing.T) { //nolint: thelper
 		p := NewStorage()
 
 		err := p.Set(context.Background(), tokenStorageKey, expectedToken)
@@ -88,7 +89,7 @@ func TestIntegrationTokenStorage_DeleteKeyring(t *testing.T) {
 		RefreshExpiresAt: time.Date(2020, 1, 2, 4, 4, 5, 0, time.UTC),
 	}
 
-	test.Run(t, tokenStorageService, tokenStorageKey, nil, func(t *testing.T) { // nolint: thelper
+	test.Run(t, tokenStorageService, tokenStorageKey, nil, func(t *testing.T) { //nolint: thelper
 		p := NewStorage()
 
 		// Prepare data.
@@ -110,7 +111,7 @@ func TestIntegrationTokenStorage_DeleteKeyring(t *testing.T) {
 }
 
 func TestIntegrationTokenStorage_DeleteKeyringNotFound(t *testing.T) {
-	test.Run(t, tokenStorageService, tokenStorageKey, nil, func(t *testing.T) { // nolint: thelper
+	test.Run(t, tokenStorageService, tokenStorageKey, nil, func(t *testing.T) { //nolint: thelper
 		p := NewStorage()
 
 		_, err := keyring.Get(tokenStorageService, tokenStorageKey)

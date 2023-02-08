@@ -1,5 +1,6 @@
+//go:build integration
 // +build integration
 
 package token
 
-const tokenStorageService = "n26api.token.test" // nolint: gosec
+const tokenStorageService = "n26api.token.test" //nolint: gosec
