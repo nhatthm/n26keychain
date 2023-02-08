@@ -17,7 +17,7 @@ func TestStorage(t *testing.T) {
 
 	s := n26keychain.NewStorage(service)
 
-	test.Run(t, service, key, nil, func(t *testing.T) { // nolint: thelper
+	test.Run(t, service, key, nil, func(t *testing.T) { //nolint: thelper
 		// Get not found.
 		data, err := s.Get(key)
 

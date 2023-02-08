@@ -1,5 +1,4 @@
 //go:build !integration
-// +build !integration
 
 package credentials
 
@@ -162,7 +161,7 @@ func TestCredentials_LoadOnce(t *testing.T) {
 func TestCredentials_LoadKeyring(t *testing.T) {
 	deviceID := uuid.New()
 
-	expect := func(t *testing.T, s n26keychain.Storage) { // nolint: thelper
+	expect := func(t *testing.T, s n26keychain.Storage) { //nolint: thelper
 		err := s.Set(deviceID.String(), `{"username":"foo","password":"bar"}`)
 		require.NoError(t, err)
 	}
@@ -170,7 +169,7 @@ func TestCredentials_LoadKeyring(t *testing.T) {
 	expectedUsername := "foo"
 	expectedPassword := "bar"
 
-	test.Run(t, credentialsService, deviceID.String(), expect, func(t *testing.T) { // nolint: thelper
+	test.Run(t, credentialsService, deviceID.String(), expect, func(t *testing.T) { //nolint: thelper
 		c := New(deviceID)
 
 		assert.Equal(t, expectedUsername, c.Username())
@@ -272,7 +271,7 @@ func TestCredentials_UpdateKeyring(t *testing.T) {
 	expectedUsername := "foo"
 	expectedPassword := "bar"
 
-	test.Run(t, credentialsService, deviceID.String(), nil, func(t *testing.T) { // nolint: thelper
+	test.Run(t, credentialsService, deviceID.String(), nil, func(t *testing.T) { //nolint: thelper
 		c := New(deviceID)
 
 		_, err := keyring.Get(credentialsService, deviceID.String())
@@ -379,7 +378,7 @@ func TestCredentials_DeleteOnce(t *testing.T) {
 func TestCredentials_DeleteKeyring(t *testing.T) {
 	deviceID := uuid.New()
 
-	expect := func(t *testing.T, s n26keychain.Storage) { // nolint: thelper
+	expect := func(t *testing.T, s n26keychain.Storage) { //nolint: thelper
 		err := s.Set(deviceID.String(), `{"username":"foo","password":"bar"}`)
 		require.NoError(t, err)
 	}
@@ -387,7 +386,7 @@ func TestCredentials_DeleteKeyring(t *testing.T) {
 	expectedUsername := "foo"
 	expectedPassword := "bar"
 
-	test.Run(t, credentialsService, deviceID.String(), expect, func(t *testing.T) { // nolint: thelper
+	test.Run(t, credentialsService, deviceID.String(), expect, func(t *testing.T) { //nolint: thelper
 		c := New(deviceID)
 
 		assert.Equal(t, expectedUsername, c.Username())
