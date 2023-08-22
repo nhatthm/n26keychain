@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/bool64/ctxd v1.2.1
-	github.com/google/uuid v1.3.0
+	github.com/google/uuid v1.3.1
 	github.com/nhatthm/n26api v0.5.0
 	github.com/stretchr/testify v1.8.4
 	github.com/zalando/go-keyring v0.2.3
